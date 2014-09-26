@@ -6,6 +6,7 @@ package guice
 
 import com.google.inject.{ Module => GuiceModule, _ }
 import com.google.inject.util.Providers
+
 import play.api._
 import play.api.inject.{ Module => PlayModule, Binding => PlayBinding, Injector => PlayInjector }
 import play.core.WebCommands
@@ -36,26 +37,13 @@ class GuiceApplicationLoader(val additionalModules: GuiceModule*) extends Applic
   import GuiceApplicationLoader._
 
   def load(context: ApplicationLoader.Context): Application = {
-
-    val env = context.environment
-
-    // Load global
-    val global = GlobalSettings(context.initialConfiguration, env)
-
-    // Create the final configuration
-    // todo - abstract this logic out into something pluggable, with the default delegating to global
-    val configuration = global.onLoadConfig(context.initialConfiguration, env.rootPath, env.classLoader, env.mode)
-
-    Logger.configure(env, configuration)
-
-    val guiceModules = guiced(Seq(
-      BindingKey(classOf[GlobalSettings]) to global,
+    val modules = guiced(Seq(
       BindingKey(classOf[OptionalSourceMapper]) to new OptionalSourceMapper(context.sourceMapper),
       BindingKey(classOf[WebCommands]) to context.webCommands
-    )) +: loadModules(env, configuration)
+    )) +: loadModules(context.environment, context.initialConfiguration)
 
     try {
-      val injector = createGuiceInjector(guiceModules)
+      val injector = createGuiceInjector(modules)
       injector.getInstance(classOf[Application])
     } catch {
       case e: CreationException => e.getCause match {

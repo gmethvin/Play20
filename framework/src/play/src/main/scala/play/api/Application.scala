@@ -198,6 +198,8 @@ class DefaultApplication @Inject() (environment: Environment,
     override val errorHandler: HttpErrorHandler,
     override val plugins: Plugins) extends Application {
 
+  Logger.configure(environment, configuration)
+
   def path = environment.rootPath
 
   def classloader = environment.classLoader
