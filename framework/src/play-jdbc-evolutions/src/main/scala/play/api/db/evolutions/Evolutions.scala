@@ -54,8 +54,11 @@ trait Script {
    * Any ";;" found in the sql are escaped to ";".
    */
   def statements: Seq[String] = {
-    // Regex matches on semicolons that neither precede nor follow other semicolons
-    sql.split("(?<!;);(?!;)").map(_.trim.replace(";;", ";")).filter(_ != "")
+    import scala.collection.JavaConverters._
+
+    val statements = new java.util.ArrayList[String]()
+    EvolutionsUtils.splitSqlScript(sql, ";", "--", "/*", "*/", statements)
+    statements.asScala.toSeq
   }
 }
 

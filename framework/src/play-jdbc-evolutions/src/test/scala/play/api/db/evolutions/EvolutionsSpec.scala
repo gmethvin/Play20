@@ -166,13 +166,16 @@ class EvolutionsSpec extends Specification {
 
     val a2 = Evolution(
       2,
-      "alter table test add column age int;",
+      " -- This is a comment; the semicolon should not matter here" +
+        "alter table test add column age int;",
       "alter table test drop age;"
     )
 
     val a3 = Evolution(
       3,
-      "insert into test (id, name, age) values (1, 'alice', 42);",
+      "/* This is" +
+        "a multi-line comment; it also has a semicolon */" +
+        "insert into test (id, name, age) values (1, 'alice', 42);",
       "delete from test;"
     )
 
