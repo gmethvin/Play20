@@ -42,10 +42,12 @@ package scalaguide.upload.fileupload {
         //#upload-file-action
         def upload = Action(parse.multipartFormData) { request =>
           request.body.file("picture").map { picture =>
-            import java.io.File
-            val filename = picture.filename
-            val contentType = picture.contentType
-            picture.ref.moveTo(new File(s"/tmp/picture/$filename"))
+            
+            // only get the last part of the filename
+            // otherwise someone can send a path like ../../home/foo/bar.txt to write to other files on the system
+            val filename = Paths.get(picture.filename).getFileName
+            
+            picture.ref.moveTo(Paths.get(s"/tmp/picture/$filename"), replace = true)
             Ok("File uploaded")
           }.getOrElse {
             Redirect(routes.Application.index).flashing(
@@ -142,4 +144,4 @@ package scalaguide.upload.fileupload {
     }
   }
 }
-  
+
